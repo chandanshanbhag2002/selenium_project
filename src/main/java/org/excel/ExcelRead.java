@@ -1,4 +1,4 @@
-package org.automation.excel;
+package org.excel;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,12 +13,12 @@ public class ExcelRead {
 
 	private static final Logger logger = Logger.getLogger(ExcelRead.class);
 	public static String[][] a = null;
-	public  static Object[][] readexcel(String filename) {
-		
+
+	public static Object[][] readexcel(String filename) {
+
 		try {
 			logger.info("Reading excel Sheet from TC.xml.");
-			FileInputStream fs = new FileInputStream(
-					new File(filename));
+			FileInputStream fs = new FileInputStream(new File(filename));
 			@SuppressWarnings("resource")
 			XSSFWorkbook wb = new XSSFWorkbook(fs);
 			XSSFSheet sheet = wb.getSheetAt(0);
@@ -63,7 +63,4 @@ public class ExcelRead {
 		return a;
 	}
 
-	
-	
-	
 }

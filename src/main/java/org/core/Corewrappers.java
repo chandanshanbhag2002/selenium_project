@@ -1,14 +1,15 @@
-package org.automation.core;
+package org.core;
 
-import org.automation.main.StartExecution;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.apache.log4j.Logger;
+import org.automation.main.StartExecution;
 
+public class Corewrappers {
 
-public class Corewrappers extends StartExecution {
-
-	public final Logger logger = Logger.getLogger(StartExecution.class);
+	public final Logger logger = Logger.getLogger(Corewrappers.class);
+	public static WebDriver driver = null;
 
 	public String getLocatorType(String locator) {
 		return (locator.split("~")[0].toLowerCase());
@@ -54,9 +55,11 @@ public class Corewrappers extends StartExecution {
 	public void click(String locator) {
 		WebElement w = getWebElement(locator);
 		if (w.isDisplayed()) {
-			w.click();			
-			//WebElement myDynamicElement = (new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.className("icn icn-tools")));
-			
+			w.click();
+			// WebElement myDynamicElement = (new WebDriverWait(driver,
+			// 10)).until(ExpectedConditions.presenceOfElementLocated(By.className("icn
+			// icn-tools")));
+
 		}
 	}
 

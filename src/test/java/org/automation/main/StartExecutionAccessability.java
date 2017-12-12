@@ -1,9 +1,16 @@
 package org.automation.main;
 
+import org.axe.*;
+import org.core.Corewrappers;
+import org.excel.ExcelRead;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
@@ -11,14 +18,13 @@ import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.core.Corewrappers;
-import org.excel.ExcelRead;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.support.ui.Wait;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
@@ -28,23 +34,23 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-public class StartExecution extends Corewrappers {
+public class StartExecutionAccessability extends Corewrappers {
 
-	public final Logger logger = Logger.getLogger(StartExecution.class);
+	public final Logger logger = Logger.getLogger(StartExecutionAccessability.class);
 	public String fileName;
 	public String[][] b;
 	public static String seleniumHome = System.getProperty("user.dir");
-	public static String url;
+	public static String murl;
 	public static String browser;
 	public static String dbMachineName;
 	public static String dbSid;
 	public static String schemaName;
 	public static String schemaPassword;
 	public static int dbPort;
-
 	public String classname, methodname;
 	public static Connection con;
 	private static String comment = null;
+	private static final URL scriptUrl = StartExecutionAccessability.class.getResource("/axe.min.js");
 
 	@BeforeSuite
 	public void beforesuite() {
@@ -54,7 +60,7 @@ public class StartExecution extends Corewrappers {
 			/* Read build.property file contents and save */
 			Properties prop = new Properties();
 			prop.load(new FileReader("conf" + File.separator + "build.properties"));
-			url = prop.getProperty("url");
+			murl = prop.getProperty("url");
 			browser = prop.getProperty("browser");
 			dbPort = Integer.parseInt(prop.getProperty("dbPort"));
 			dbMachineName = prop.getProperty("dbMachineName");
@@ -65,7 +71,6 @@ public class StartExecution extends Corewrappers {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			con = DriverManager.getConnection("jdbc:oracle:thin:@" + dbMachineName + ":" + dbPort + ":" + dbSid,
 					schemaName, schemaPassword);
-
 			if (browser.toLowerCase().equals("chrome")) {
 				System.setProperty("webdriver.chrome.driver", "driver\\ChomeDriver\\chromedriver.exe");
 
@@ -79,7 +84,7 @@ public class StartExecution extends Corewrappers {
 				System.setProperty("webdriver.ie.driver", "driver\\IEDriver\\IEDriverServer.exe");
 				driver = new InternetExplorerDriver();
 			}
-			driver.get(url);
+			// driver.get(url);
 			// driver.manage().window().maximize();
 			Thread.sleep(5000);
 		} catch (Exception e) {
@@ -111,37 +116,20 @@ public class StartExecution extends Corewrappers {
 
 	@SuppressWarnings({ "rawtypes" })
 	@Test(dataProvider = "excelData")
-	public void execute(String tcId, String comment, String function, String locator, String arg)
+	public void execute(String tcId, String comment, String function, String url, String result)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException,
-			SecurityException, IllegalArgumentException, InvocationTargetException {
+			SecurityException, IllegalArgumentException, InvocationTargetException, InterruptedException {
 		logger.info("Entering Main method...");
 		logger.info("Absolute path of the Project : " + seleniumHome);
-		String[] args = { locator, arg };
+		String[] args = { url, result };
 		Class<?> classObj = null;
 		Object obj = null;
-		StartExecution.setComment(comment);
-		if (function.split(".").length > 0) {
-			classname = function.split(".")[0].toString();
-			methodname = function.split(".")[1].toString();
-			String firstChar = classname.substring(0, 1).toUpperCase();
-			String otherChars = classname.substring(1, classname.length()).toLowerCase();
-			classname = firstChar + otherChars;
-			classObj = Class.forName("org.core." + classname);
-			obj = classObj.newInstance();
-			Class[] classArr = null;
-			ArrayList<Class> classList = new ArrayList<Class>();
-			ArrayList<String> largs = new ArrayList<String>();
-
-			for (int i = 0; i < args.length; i++) {
-				if (args[i] != null && !args[i].equals("")) {
-					classList.add(String.class);
-					largs.add(args[i]);
-				}
-			}
-			classArr = new Class[classList.size()];
-			classArr = classList.toArray(classArr);
-			Method m = classObj.getMethod(methodname, classArr);
-			m.invoke(obj, largs.toArray());
+		if (function.equalsIgnoreCase("acc")) {
+			driver.get(murl+url);
+			Thread.sleep(5000);
+			
+			StartExecutionAccessability sa = new StartExecutionAccessability();
+			sa.testAccessibility(result);
 		} else {
 			classObj = Class.forName("org.core.Corewrappers");
 			obj = classObj.newInstance();
@@ -159,6 +147,21 @@ public class StartExecution extends Corewrappers {
 			classArr = classList.toArray(classArr);
 			Method m = classObj.getMethod(methodname, classArr);
 			m.invoke(obj, largs.toArray());
+		}
+	}
+
+	public void testAccessibility(String filename) {
+		JSONObject responseJSON = new AXE.Builder(driver, scriptUrl).analyze();
+
+		JSONArray violations = responseJSON.getJSONArray("violations");
+
+		if (violations.length() == 0) {
+			assertTrue("No violations found", true);
+			logger.info("No violations found");
+		} else {
+			AXE.writeResults(filename, responseJSON);
+			assertTrue(AXE.report(violations), false);
+			logger.info("violations found");
 		}
 	}
 
@@ -183,7 +186,7 @@ public class StartExecution extends Corewrappers {
 	}
 
 	public static void setComment(String comment) {
-		StartExecution.comment = comment;
+		StartExecutionAccessability.comment = comment;
 	}
 
 }
