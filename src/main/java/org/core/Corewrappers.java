@@ -1,10 +1,12 @@
 package org.core;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.InvalidSelectorException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.apache.log4j.Logger;
-import org.automation.main.StartExecution;
 
 public class Corewrappers {
 
@@ -52,14 +54,67 @@ public class Corewrappers {
 		return webElement;
 	}
 
-	public void click(String locator) {
+	public void click(String locator) throws InterruptedException {
 		WebElement w = getWebElement(locator);
-		if (w.isDisplayed()) {
+		if (w.isDisplayed() || w.isEnabled()) {
 			w.click();
-			// WebElement myDynamicElement = (new WebDriverWait(driver,
-			// 10)).until(ExpectedConditions.presenceOfElementLocated(By.className("icn
-			// icn-tools")));
 
+		}
+	}
+
+	public void login(String username, String password, WebDriver driver) throws InterruptedException {
+		logoWait(driver);
+		this.setText("id~username", username);
+		this.setText("id~password", password);
+		this.click("xpath~//button[contains(@class,'rtPanelSubmitBtnBg')]");
+	}
+
+	public void logoWait(WebDriver driver) throws InvalidSelectorException {
+		WebElement ele = driver.findElement(By.className("content-loader"));
+
+		try {
+			if (ele.isDisplayed() || ele.isEnabled() || ele.isSelected()) {
+
+				WebDriverWait wait = new WebDriverWait(driver, 30);
+				By addItem = By.className("content-loader");
+				WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(addItem));
+				wait.until(ExpectedConditions.stalenessOf(element));
+			}
+		} catch (InvalidSelectorException e) {
+			logger.info("no class found");
+		}
+	}
+
+	public void progressWait(WebDriver driver) throws InvalidSelectorException {
+		WebElement ele = driver.findElement(By.className("pace  pace-active"));
+		// WebElement ele2=driver.findElement(By.className("pace-progress"));
+		try {
+
+			if (ele.isDisplayed() || ele.isEnabled() || ele.isSelected()) {
+				// if (ele2.isDisplayed() || ele2.isEnabled() ||
+				// ele2.isSelected()) {
+				WebDriverWait wait = new WebDriverWait(driver, 30);
+				By addItem = By.className("pace  pace-active");
+				WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(addItem));
+				wait.until(ExpectedConditions.stalenessOf(element));
+				// }
+			}
+		} catch (InvalidSelectorException e) {
+			logger.info("no class found");
+		}
+	}
+
+	public void alertWait(WebDriver driver) throws InvalidSelectorException {
+		WebElement ele = driver.findElement(By.className("alert alert-info"));
+		try {
+			if (ele.isDisplayed() || ele.isEnabled() || ele.isSelected()) {
+				WebDriverWait wait = new WebDriverWait(driver, 30);
+				By addItem = By.className("alert alert-info");
+				WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(addItem));
+				wait.until(ExpectedConditions.stalenessOf(element));
+			}
+		} catch (InvalidSelectorException e) {
+			logger.info("no class found");
 		}
 	}
 

@@ -15,7 +15,6 @@ import org.core.Corewrappers;
 import org.excel.ExcelRead;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
@@ -68,10 +67,8 @@ public class StartExecution extends Corewrappers {
 
 			if (browser.toLowerCase().equals("chrome")) {
 				System.setProperty("webdriver.chrome.driver", "driver\\ChomeDriver\\chromedriver.exe");
-
 				driver = new ChromeDriver();
 				driver.manage().window().maximize();
-
 			} else if (browser.toLowerCase().equals("firefox")) {
 				System.setProperty("webdriver.gecko.driver", "driver\\FFDriver\\geckodriver.exe");
 				driver = new FirefoxDriver();

@@ -1,5 +1,27 @@
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import net.sf.saxon.TransformerFactoryImpl;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 apply plugin: "java"
 apply plugin: "maven"
+
+buildscript {
+	repositories {
+		mavenCentral()
+		maven {
+			name "ext-release-local"
+			url "http://msjenkins:8081/artifactory/ext-release-local"
+		}
+	}
+	dependencies {
+		classpath group: 'net.sf.saxon', name: 'saxon', version: '8.7'
+	}
+}
 
 repositories{
 	mavenCentral()
@@ -9,7 +31,9 @@ repositories{
 	maven{
 		url "https://mvnrepository.com/artifact/"
 	}
+	
 }
+
 sourceSets {
 	main{
 		java{
@@ -20,10 +44,22 @@ sourceSets {
 		java{
 			srcDirs=['src/test/java']
 		}
-	}	
+	}
+	api
+	impl
+	
 }
-dependencies{
 
+dependencies{
+	apiCompile 'commons-codec:commons-codec:1.5'
+	
+	implCompile sourceSets.api.output
+	implCompile group: 'commons-lang', name: 'commons-lang', version: '2.6'
+
+	testCompile sourceSets.api.output
+	testCompile sourceSets.impl.output
+
+testCompile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'		
 compile group: 'org.seleniumhq.selenium', name: 'selenium-server', version: '3.0.0-beta2'
 compile group: 'log4j', name: 'log4j', version: '1.2.17'
 compile group: 'net.sourceforge.jexcelapi', name: 'jxl', version: '2.6.12'
@@ -35,20 +71,71 @@ compile group: 'oracle', name: 'ojdbc6', version: '11.2.0.2.0'
 compile group: 'org.json', name: 'json', version: '20160212'
 compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.4.4'
 testCompile group: 'org.testng', name: 'testng', version: '6.11'
-
+	
+	runtime configurations.apiRuntime
+	runtime configurations.implRuntime
+	
 }
 
-test{
-def suite = 'TC.xml'
+
+task _updateConfigFile(type: WriteProperties) {
+	def config = "${project.projectDir}"+File.separator+"conf"+File.separator+"build.properties"
+	// load existing properties from file
+	file(config).withInputStream {
+		def props = new Properties()
+		props.load(it)
+		properties(props)
+	}
+	['url','username', 'password', 'browser', 'dbMachineName', 'dbPort',
+			 'dbSid', 'schemaName', 'schemaPassword','suite'].each { name ->
+		def value = project.findProperty(name)
+		if (value != null) {
+			property(name, value)
+		}
+	}
+	setOutputFile(config)
+	writeProperties()
+}
+
+
+test {
+	def restSuite = null
 	useTestNG {
-		println "The suite file is executed is : " + suite
-		suites suite
+		if (project.hasProperty('suite')){
+			restSuite=suite
+		}else{
+			restSuite="Systempages.xml"
+		}
+		suites restSuite
 		useDefaultListeners=true;
 	}
-	
 	reports {
-		junitXml.enabled = false
+		junitXml.enabled = true
 		html.enabled = true
+	}
+
+	task testXslt {
+		doLast {
+			System.setProperty("javax.xml.transform.TransformerFactory", "net.sf.saxon.TransformerFactoryImpl");
+			TransformerFactory factory = TransformerFactory.newInstance();
+			def testngResultXmlFile = new File("${project.projectDir}"+ File.separator + "build"+ File.separator +"reports"+ File.separator + "tests"+ File.separator +"test"+ File.separator + "testng-results.xml")
+			StreamSource inputSource = new StreamSource(testngResultXmlFile);
+			Transformer transformer = factory.newTransformer(new StreamSource(new File("${project.projectDir}"+ File.separator + "testng-results.xsl")));
+			File outputDir = new File("${project.projectDir}"+'/XSLTResults')
+			outputDir.mkdirs()
+			transformer.setParameter("testNgXslt.outputDir", outputDir.getAbsolutePath());
+			transformer.setParameter("testNgXslt.showRuntimeTotals","false");
+			transformer.setParameter("testNgXslt.reportTitle", "Test");
+			transformer.setParameter("testNgXslt.sortTestCaseLinks", "true");
+			transformer.setParameter("testNgXslt.testDetailsFilter", "FAIL,SKIP,PASS,BY_CLASS");
+			transformer.transform(inputSource, new StreamResult(new FileOutputStream("${project.projectDir}"+ File.separator + "XSLTResults" + File.separator + "index.html")));
+			ant.echo("Generated report")
+		}
 	}
 }
 
+test.finalizedBy(testXslt)
+
+task cleanResult{ 
+	delete "XSLTResults"
+}

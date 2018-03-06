@@ -216,20 +216,21 @@ public class AXE {
 	@SuppressWarnings("resource")
 	public static void writeResults(final String name, final Object output) {
 		Writer writer = null;
-		String dir=System.getProperty("user.dir").concat(File.separator).concat("AccResult").concat(File.separator);
-		File ff=new File(dir);
+		String dir = System.getProperty("user.dir").concat(File.separator).concat("AccResult").concat(File.separator);
+		File ff = new File(dir);
 		ff.mkdir();
 		try {
-//			writer = new BufferedWriter(
-//					new OutputStreamWriter(
-//					new FileOutputStream(name + ".json"), "utf-8"));
-			//writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(name + ".json"), "utf-8"));
-			
-			File actual=new File(dir,name+".json");
-			FileWriter f=new FileWriter(actual);
-			 ObjectMapper mapper = new ObjectMapper();
-             Object jsonObject = mapper.readValue(output.toString(),Object.class);
-             String prettyJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+			// writer = new BufferedWriter(
+			// new OutputStreamWriter(
+			// new FileOutputStream(name + ".json"), "utf-8"));
+			// writer = new BufferedWriter(new OutputStreamWriter(new
+			// FileOutputStream(name + ".json"), "utf-8"));
+
+			File actual = new File(dir, name + ".json");
+			FileWriter f = new FileWriter(actual);
+			ObjectMapper mapper = new ObjectMapper();
+			Object jsonObject = mapper.readValue(output.toString(), Object.class);
+			String prettyJson = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
 			f.write(prettyJson);
 		} catch (IOException ignored) {
 		} finally {
