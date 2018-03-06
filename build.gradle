@@ -86,10 +86,9 @@ task _updateConfigFile(type: WriteProperties) {
 		props.load(it)
 		properties(props)
 	}
-	['url','username', 'password', 'browser', 'dbMachineName', 'dbPort',
-			 'dbSid', 'schemaName', 'schemaPassword','suite'].each { name ->
+	['url','username', 'password', 'browser','suite','webdriver'].each { name ->
 		def value = project.findProperty(name)
-		if (value != null) {
+		if(value != null) {
 			property(name, value)
 		}
 	}
@@ -110,7 +109,7 @@ test {
 		useDefaultListeners=true;
 	}
 	reports {
-		junitXml.enabled = true
+		junitXml.enabled = false
 		html.enabled = true
 	}
 
@@ -135,7 +134,6 @@ test {
 }
 
 test.finalizedBy(testXslt)
-
 task cleanResult{ 
 	delete "XSLTResults"
 }
