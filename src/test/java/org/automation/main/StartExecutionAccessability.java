@@ -10,12 +10,16 @@ import java.net.URL;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.Random;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.core.Corewrappers;
+import org.core.Tasks;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -45,6 +49,7 @@ public class StartExecutionAccessability extends Corewrappers {
 	public static Connection con;
 	private static String comment = null;
 	private static final URL scriptUrl = StartExecutionAccessability.class.getResource("/axe.js");
+	public static int rand = new Random().nextInt(9999);
 
 	@BeforeSuite
 	public void beforesuite() {
@@ -62,7 +67,7 @@ public class StartExecutionAccessability extends Corewrappers {
 			// "driver\\ChomeDriver\\chromedriver.exe"
 			// "driver\\FFDriver\\geckodriver.exe"
 			// "driver\\IEDriver\\IEDriverServer.exe"
-			if (System.getProperty("os.name").equalsIgnoreCase("windows")) {
+			if (System.getProperty("os.name").contains("Windows")) {
 				if (browser.toLowerCase().equals("chrome")) {
 					System.setProperty("webdriver.chrome.driver", webdriver);
 					driver = new ChromeDriver();
@@ -93,7 +98,9 @@ public class StartExecutionAccessability extends Corewrappers {
 					driver = new RemoteWebDriver(serverurl, capabilities);
 					driver.manage().window().maximize();
 				}
+				
 			}
+			
 
 		} catch (Exception e) {
 			logger.error(e.toString());
@@ -121,35 +128,54 @@ public class StartExecutionAccessability extends Corewrappers {
 
 	@SuppressWarnings({ "rawtypes" })
 	@Test(dataProvider = "excelData")
-	public void execute(String tcId, String comment, String function, String url, String result)
+	public void execute(String tcId, String comment, String function, String arg1, String arg2)
 			throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException,
 			SecurityException, IllegalArgumentException, InvocationTargetException, InterruptedException {
 
 		logger.info("Entering Main method...");
 		logger.info("Absolute path of the Project : " + seleniumHome);
-
+		if(arg1!=null)
+		arg1= arg1.replace("$R",String.valueOf(rand));
+		if(arg2!=null)
+		arg2= arg2.replace("$R",String.valueOf(rand));
 		this.setComment(comment);
-		String[] args = { url, result };
+		String[] args = { arg1, arg2 };
 		Class<?> classObj = null;
 		Object obj = null;
+		Tasks t= new Tasks();
 
 		if (function.equalsIgnoreCase("login")) {
-
+			driver.get(murl);
+			//logoWait(driver);
+			//Thread.sleep(5000);
 			login(username, password,driver);
-			logoWait(driver);
+			//logoWait(driver);
 			// progressWait(driver);
+			impicitWait(3);
+			if(driver.findElement(By.id("logoutLink"))!=null){
+				System.out.println("Logged in Successfully");
+			}
+			else{
+				System.out.println("Login failed");
+			}
 		} else if (function.equalsIgnoreCase("goto")) {
-			driver.get(murl + url);
+			driver.get(murl + arg1);
 			logoWait(driver);
 			// progressWait(driver);
 			// alertWait(driver);
-			logger.info("navigated to " + url);
+			logger.info("navigated to " + arg1);
 
 		} else if (function.equalsIgnoreCase("acc")) {
 			StartExecutionAccessability sa = new StartExecutionAccessability();
-			sa.testAccessibility(result);
+			sa.testAccessibility(arg2);
 
-		} else {
+		} 
+		else if (function.equalsIgnoreCase("navigateTasks")) {
+			t.navigateTasks(driver);
+
+		} 
+
+		else {
 			classObj = Class.forName("org.core.Corewrappers");
 			obj = classObj.newInstance();
 			methodname = function;

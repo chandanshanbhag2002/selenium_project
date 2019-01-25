@@ -10,9 +10,4 @@
 			<class name="org.automation.main.StartExecutionAccessability" />
 		</classes>
 	</test>
-
-
-
-
-
 </suite>

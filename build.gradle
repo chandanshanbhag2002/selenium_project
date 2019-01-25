@@ -77,26 +77,6 @@ testCompile group: 'org.testng', name: 'testng', version: '6.11'
 	
 }
 
-
-task _updateConfigFile(type: WriteProperties) {
-	def config = "${project.projectDir}"+File.separator+"conf"+File.separator+"build.properties"
-	// load existing properties from file
-	file(config).withInputStream {
-		def props = new Properties()
-		props.load(it)
-		properties(props)
-	}
-	['url','username', 'password', 'browser','suite','webdriver'].each { name ->
-		def value = project.findProperty(name)
-		if(value != null) {
-			property(name, value)
-		}
-	}
-	setOutputFile(config)
-	writeProperties()
-}
-
-
 test {
 	def restSuite = null
 	useTestNG {

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
@@ -18,6 +19,8 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
@@ -33,13 +36,14 @@ public class StartExecution extends Corewrappers {
 	public String fileName;
 	public String[][] b;
 	public static String seleniumHome = System.getProperty("user.dir");
-	public static String url;
+	public static String url,webdriver;
 	public static String browser;
 	public static String dbMachineName;
 	public static String dbSid;
 	public static String schemaName;
 	public static String schemaPassword;
 	public static int dbPort;
+	public static URL serverurl;
 
 	public String classname, methodname;
 	public static Connection con;
@@ -55,27 +59,50 @@ public class StartExecution extends Corewrappers {
 			prop.load(new FileReader("conf" + File.separator + "build.properties"));
 			url = prop.getProperty("url");
 			browser = prop.getProperty("browser");
-			dbPort = Integer.parseInt(prop.getProperty("dbPort"));
-			dbMachineName = prop.getProperty("dbMachineName");
-			dbSid = prop.getProperty("dbSid");
-			schemaName = prop.getProperty("schemaName");
-			schemaPassword = prop.getProperty("schemaPassword");
+			webdriver = prop.getProperty("webdriver");
+//			dbPort = Integer.parseInt(prop.getProperty("dbPort"));
+//			dbMachineName = prop.getProperty("dbMachineName");
+//			dbSid = prop.getProperty("dbSid");
+//			schemaName = prop.getProperty("schemaName");
+//			schemaPassword = prop.getProperty("schemaPassword");
 			/* Establish database connection */
-			Class.forName("oracle.jdbc.driver.OracleDriver");
-			con = DriverManager.getConnection("jdbc:oracle:thin:@" + dbMachineName + ":" + dbPort + ":" + dbSid,
-					schemaName, schemaPassword);
+//			Class.forName("oracle.jdbc.driver.OracleDriver");
+//			con = DriverManager.getConnection("jdbc:oracle:thin:@" + dbMachineName + ":" + dbPort + ":" + dbSid,
+//					schemaName, schemaPassword);
 
-			if (browser.toLowerCase().equals("chrome")) {
-				System.setProperty("webdriver.chrome.driver", "driver\\ChomeDriver\\chromedriver.exe");
-				driver = new ChromeDriver();
-				driver.manage().window().maximize();
-			} else if (browser.toLowerCase().equals("firefox")) {
-				System.setProperty("webdriver.gecko.driver", "driver\\FFDriver\\geckodriver.exe");
-				driver = new FirefoxDriver();
-			} else if (browser.toLowerCase().equals("ie")) {
-				System.setProperty("webdriver.ie.driver", "driver\\IEDriver\\IEDriverServer.exe");
-				driver = new InternetExplorerDriver();
+			if (System.getProperty("os.name").contains("Windows")) {
+				if (browser.toLowerCase().equals("chrome")) {
+					System.setProperty("webdriver.chrome.driver", webdriver);
+					driver = new ChromeDriver();
+					driver.manage().window().maximize();
+				} else if (browser.toLowerCase().equals("firefox")) {
+					System.setProperty("webdriver.gecko.driver", webdriver);
+					driver = new FirefoxDriver();
+					driver.manage().window().maximize();
+				} else if (browser.toLowerCase().equals("ie")) {
+					System.setProperty("webdriver.ie.driver", webdriver);
+					driver = new InternetExplorerDriver();
+					driver.manage().window().maximize();
+				}
+			} else if (System.getProperty("os.name").equalsIgnoreCase("linux")) {
+				if (browser.toLowerCase().equals("chrome")) {
+					DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+					serverurl = new URL("http://localhost:9515");
+					driver = new RemoteWebDriver(serverurl, capabilities);
+					driver.manage().window().maximize();
+				} else if (browser.toLowerCase().equals("firefox")) {
+					DesiredCapabilities capabilities = DesiredCapabilities.firefox();
+					serverurl = new URL("http://localhost:9515");
+					driver = new RemoteWebDriver(serverurl, capabilities);
+					driver.manage().window().maximize();
+				} else if (browser.toLowerCase().equals("ie")) {
+					DesiredCapabilities capabilities = DesiredCapabilities.internetExplorer();
+					serverurl = new URL("http://localhost:9515");
+					driver = new RemoteWebDriver(serverurl, capabilities);
+					driver.manage().window().maximize();
+				}
 			}
+
 			driver.get(url);
 			// driver.manage().window().maximize();
 			Thread.sleep(5000);

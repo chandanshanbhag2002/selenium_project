@@ -6,14 +6,16 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.util.concurrent.TimeUnit;
+
 import org.apache.log4j.Logger;
 
 public class Corewrappers {
 
 	public final Logger logger = Logger.getLogger(Corewrappers.class);
 	public static WebDriver driver = null;
-
-	public String getLocatorType(String locator) {
+	public String getLocType(String locator) {
 		return (locator.split("~")[0].toLowerCase());
 	}
 
@@ -26,23 +28,23 @@ public class Corewrappers {
 
 		try {
 
-			if (getLocatorType(locator).equalsIgnoreCase("XPATH")) {
+			if (getLocType(locator).equalsIgnoreCase("XPATH")) {
 
 				webElement = driver.findElement(By.xpath(getLocator(locator)));
 
-			} else if (getLocatorType(locator).equalsIgnoreCase("ID")) {
+			} else if (getLocType(locator).equalsIgnoreCase("ID")) {
 
 				webElement = driver.findElement(By.id(getLocator(locator)));
 
-			} else if (getLocatorType(locator).equalsIgnoreCase("NAME")) {
+			} else if (getLocType(locator).equalsIgnoreCase("NAME")) {
 
 				webElement = driver.findElement(By.name(getLocator(locator)));
 
-			} else if (getLocatorType(locator).equalsIgnoreCase("CSS")) {
+			} else if (getLocType(locator).equalsIgnoreCase("CSS")) {
 
 				webElement = driver.findElement(By.cssSelector(getLocator(locator)));
 
-			} else if (getLocatorType(locator).equalsIgnoreCase("LINKTEXT")) {
+			} else if (getLocType(locator).equalsIgnoreCase("LINKTEXT")) {
 
 				webElement = driver.findElement(By.linkText(getLocator(locator)));
 			}
@@ -63,10 +65,10 @@ public class Corewrappers {
 	}
 
 	public void login(String username, String password, WebDriver driver) throws InterruptedException {
-		logoWait(driver);
+		//logoWait(driver);
 		this.setText("id~username", username);
-		this.setText("id~password", password);
-		this.click("xpath~//button[contains(@class,'rtPanelSubmitBtnBg')]");
+		this.setText("name~pwd", password);
+		this.click("xpath~//*[@id='loginButton']/div");
 	}
 
 	public void logoWait(WebDriver driver) throws InvalidSelectorException {
@@ -124,6 +126,17 @@ public class Corewrappers {
 			w.sendKeys(args);
 		}
 
+	}
+	public void impicitWait(int i) throws InterruptedException{
+		driver.manage().timeouts().implicitlyWait(i, TimeUnit.SECONDS);
+	}
+	
+	public void toWait() throws InterruptedException{	
+		/*System.out.println(i);
+	int j=Integer.parseInt(i.split(" .")[0])*1000;
+	System.out.println(j);*/
+	
+	Thread.sleep(2000);
 	}
 
 }
