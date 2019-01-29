@@ -171,7 +171,7 @@ public class StartExecutionAccessability extends Corewrappers {
 
 		} 
 		else if (function.equalsIgnoreCase("navigateTasks")) {
-			t.navigateTasks(driver);
+			//t.navigateTasks(driver);
 
 		} 
 
