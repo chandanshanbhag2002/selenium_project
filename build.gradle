@@ -11,7 +11,12 @@ apply plugin: "java"
 apply plugin: "maven"
 
 buildscript {
-	
+
+	dependencies {
+		classpath group: 'net.sf.saxon', name: 'saxon', version: '8.7'
+	}
+}
+
 repositories{
 	mavenCentral()
 	
@@ -21,10 +26,6 @@ repositories{
 	
 }
 
-	dependencies {
-		classpath group: 'net.sf.saxon', name: 'saxon', version: '8.7'
-	}
-}
 
 sourceSets {
 	main{
