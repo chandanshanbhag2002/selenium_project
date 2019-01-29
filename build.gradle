@@ -11,6 +11,14 @@ apply plugin: "java"
 apply plugin: "maven"
 
 buildscript {
+repositories{
+	mavenCentral()
+	
+	maven{
+		url "https://mvnrepository.com/artifact/"
+	}
+	
+}
 
 	dependencies {
 		classpath group: 'net.sf.saxon', name: 'saxon', version: '8.7'
