@@ -11,27 +11,19 @@ apply plugin: "java"
 apply plugin: "maven"
 
 buildscript {
-	repositories {
-		mavenCentral()
-		maven {
-			name "ext-release-local"
-			url "http://msjenkins:8081/artifactory/ext-release-local"
-		}
-	}
-	dependencies {
-		classpath group: 'net.sf.saxon', name: 'saxon', version: '8.7'
-	}
-}
-
+	
 repositories{
 	mavenCentral()
-	maven {
-		url "http://msjenkins:8081/artifactory/ext-release-local"
-	}
+	
 	maven{
 		url "https://mvnrepository.com/artifact/"
 	}
 	
+}
+
+	dependencies {
+		classpath group: 'net.sf.saxon', name: 'saxon', version: '8.7'
+	}
 }
 
 sourceSets {
