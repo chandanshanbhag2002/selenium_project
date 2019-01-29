@@ -68,7 +68,7 @@ compile group: 'org.apache.poi', name: 'poi', version: '3.13'
 compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.13'
 compile group: 'org.apache.poi', name: 'poi-ooxml-schemas', version: '3.13'
 compile group: 'org.apache.xmlbeans', name: 'xmlbeans', version: '2.6.0'
-compile group: 'com.oracle', name: 'ojdbc', version: '6'
+
 compile group: 'org.json', name: 'json', version: '20160212'
 compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.4.4'
 testCompile group: 'org.testng', name: 'testng', version: '6.11'
