@@ -1,6 +1,6 @@
 package org.core;
 
-import org.automation.main.*;
+
 import org.openqa.selenium.WebDriver;
 public class Tasks extends Corewrappers {
 	public  static String taskUrl=StartExecutionAccessability.murl+"/tasks/tasklist.do";
