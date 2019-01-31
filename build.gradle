@@ -133,7 +133,10 @@ test {
 	}
 }
 
+
 test.finalizedBy(testXslt)
 task cleanResult{ 
+doLast{
 	delete "XSLTResults"
+}
 }

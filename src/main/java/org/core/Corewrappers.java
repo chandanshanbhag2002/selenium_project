@@ -136,7 +136,7 @@ public class Corewrappers {
 	int j=Integer.parseInt(i.split(" .")[0])*1000;
 	System.out.println(j);*/
 	
-	Thread.sleep(2000);
+	Thread.sleep(6000);
 	}
 
 }
